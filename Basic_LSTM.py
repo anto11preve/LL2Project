@@ -448,7 +448,8 @@ def objective(trial, X_train, y_train, X_val, y_val, X_test, y_test, scaler_y):
 
     # Select loss function
     #loss_function = trial.suggest_categorical("loss_function", ["MSE", "MAE", "Huber"])
-    loss_function = trial.suggest_categorical("loss_function", ["Huber"]) #being proved to be the best
+    #loss_function = trial.suggest_categorical("loss_function", ["Huber"]) #being proved to be the best
+    loss_function= "Huber" #fixed to Huber for now
     # Create model
     model = LSTMRegressor(input_size, hidden_size, num_layers, dropout).to(device)
 
@@ -593,7 +594,8 @@ def main():
     batch_size = best_params['batch_size']
     learning_rate = best_params['learning_rate']
     optimizer_name = best_params['optimizer']
-    loss_function = best_params['loss_function']
+    #loss_function = best_params['loss_function']
+    loss_function = "Huber" #fixed to Huber for now
 
     # Create datasets and dataloaders for final model
     train_dataset = MultivariateTimeSeriesDataset(X_train, y_train)
