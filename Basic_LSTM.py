@@ -11,6 +11,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import time
 from random import randint
+import optuna
+from optuna.trial import TrialState
 
 
 
@@ -418,16 +420,17 @@ def main():
     """
     # Hyperparameters
     input_size = 3  # Number of features ('heart_rate_data', 'respiration_data', 'stress_data')
-    hidden_size = 7  # Number of features in each hidden state
-    num_layers = 2  # Number of recurrent layers
-    dropout = 0.2  # Dropout probability
-    learning_rate = 0.001  # Learning rate
+    hidden_size = 9  # Number of features in each hidden state
+    num_layers = 1  # Number of recurrent layers
+    dropout = 0.3  # Dropout probability
+    learning_rate = 0.0005  # Learning rate
     num_epochs = 100  # Maximum number of training epochs
-    batch_size = 4  # Batch size - smaller due to limited number of samples (small reminder Batch is the number of samples processed before the model is updated)
+    batch_size = 2  # Batch size - smaller due to limited number of samples (small reminder Batch is the number of samples processed before the model is updated)
+    patience = 20  # Number of epochs with no improvement after which training will be stopped
 
     print(hidden_size)
     seed=42
-    split_seed=randint(0, 10000)
+    random_seed=randint(0, 10000)
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
@@ -483,7 +486,7 @@ def main():
         criterion=criterion,
         optimizer=optimizer,
         num_epochs=num_epochs,
-        patience=10
+        patience=patience
     )
     end = time.perf_counter()
     print(f"Training time: {end - start:.2f} seconds")
@@ -500,5 +503,5 @@ def main():
     return trained_model, evaluation_results
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+main()
