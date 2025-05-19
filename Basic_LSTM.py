@@ -448,7 +448,7 @@ def objective(trial, X_train, y_train, X_val, y_val, X_test, y_test, scaler_y):
 
     # Select loss function
     #loss_function = trial.suggest_categorical("loss_function", ["MSE", "MAE", "Huber"])
-    loss_function = "Huber" #being proved to be the best
+    loss_function = trial.suggest_categorical("loss_function", ["Huber"]) #being proved to be the best
     # Create model
     model = LSTMRegressor(input_size, hidden_size, num_layers, dropout).to(device)
 

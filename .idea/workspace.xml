@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="LSTM, with CUDA tester and WITH Optuna">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="LSTM, with CUDA tester and WITH Optuna, Huber as loss function" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -112,13 +110,22 @@
       <option name="project" value="LOCAL" />
       <updated>1747694818211</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="LSTM, with CUDA tester and WITH Optuna, Huber as loss function">
+      <option name="closed" value="true" />
+      <created>1747696084544</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1747696084544</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added a test for CUDA" />
     <MESSAGE value="LSTM, with CUDA tester and NO Optuna" />
     <MESSAGE value="LSTM, with CUDA tester and WITH Optuna" />
-    <option name="LAST_COMMIT_MESSAGE" value="LSTM, with CUDA tester and WITH Optuna" />
+    <MESSAGE value="LSTM, with CUDA tester and WITH Optuna, Huber as loss function" />
+    <option name="LAST_COMMIT_MESSAGE" value="LSTM, with CUDA tester and WITH Optuna, Huber as loss function" />
   </component>
 </project>
