@@ -466,7 +466,7 @@ def main():
     # 5. Define loss function and optimizer
     #criterion = nn.MSELoss()
     # Use Mean Absolute Error Loss for regression
-    criterion = nn.L1Loss()
+    criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 

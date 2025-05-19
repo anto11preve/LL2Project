@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Basic_LSTM.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/LL2Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LL2Project.iml" afterDir="false" />
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Added a test for CUDA">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cuda_Tester.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +71,19 @@
       <option name="presentableId" value="Default" />
       <updated>1747560427330</updated>
     </task>
+    <task id="LOCAL-00001" summary="Added a test for CUDA">
+      <option name="closed" value="true" />
+      <created>1747681257789</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747681257789</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added a test for CUDA" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added a test for CUDA" />
   </component>
 </project>
