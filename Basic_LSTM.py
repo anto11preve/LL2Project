@@ -573,7 +573,7 @@ def main():
 
     # Run the optimization
     study.optimize(lambda trial: objective(trial, X_train, y_train, X_val, y_val, X_test, y_test, scaler_y),
-                   n_trials=50, timeout=3600)  # Run 50 trials or for 1 hour
+                   n_trials=500, timeout=3600)  # Run 500 trials or for 1 hour
 
     end_time = time.perf_counter()
     print(f"Optimization completed in {end_time - start_time:.2f} seconds")
