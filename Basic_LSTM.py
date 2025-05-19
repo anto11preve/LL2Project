@@ -412,48 +412,190 @@ def plot_results(history, evaluation_results):
     plt.show()
 
 
-# ------------------ PART 7: Main Function ------------------
+# ------------------ NEW PART: Optuna Objective Function ------------------
+
+def objective(trial, X_train, y_train, X_val, y_val, X_test, y_test, scaler_y):
+    """
+    Objective function for Optuna hyperparameter optimization.
+
+    Args:
+        trial: Optuna trial object
+        X_train, y_train: Training data
+        X_val, y_val: Validation data
+        X_test, y_test: Test data
+        scaler_y: StandardScaler for y values
+
+    Returns:
+        float: Validation loss (to be minimized)
+    """
+    # Set device
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Define hyperparameters to optimize
+    input_size = 3  # Fixed based on data
+
+    # Suggest hyperparameters using Optuna
+    hidden_size = trial.suggest_int("hidden_size", 4, 64)
+    num_layers = trial.suggest_int("num_layers", 1, 3)
+    dropout = trial.suggest_float("dropout", 0.0, 0.5)
+    batch_size = trial.suggest_categorical("batch_size", [2, 4, 8])
+
+    # Learning rate
+    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)
+
+    # Select optimizer
+    optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"])
+
+    # Select loss function
+    loss_function = trial.suggest_categorical("loss_function", ["MSE", "MAE", "Huber"])
+
+    # Create model
+    model = LSTMRegressor(input_size, hidden_size, num_layers, dropout).to(device)
+
+    # Create datasets and dataloaders
+    train_dataset = MultivariateTimeSeriesDataset(X_train, y_train)
+    val_dataset = MultivariateTimeSeriesDataset(X_val, y_val)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size)
+
+    # Set criterion based on suggested loss function
+    if loss_function == "MSE":
+        criterion = nn.MSELoss()
+    elif loss_function == "MAE":
+        criterion = nn.L1Loss()
+    else:  # Huber
+        criterion = nn.SmoothL1Loss()
+
+    # Set optimizer
+    if optimizer_name == "Adam":
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    elif optimizer_name == "RMSprop":
+        optimizer = optim.RMSprop(model.parameters(), lr=learning_rate)
+    else:  # SGD
+        optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+
+    # Early stopping parameters
+    patience = 10
+    num_epochs = 100
+
+    # Training
+    best_val_loss = float('inf')
+    counter = 0
+
+    for epoch in range(num_epochs):
+        # Training phase
+        model.train()
+        train_loss = 0.0
+
+        for inputs, targets in train_loader:
+            inputs, targets = inputs.to(device), targets.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item() * inputs.size(0)
+
+        train_loss = train_loss / len(train_loader.dataset)
+
+        # Validation phase
+        model.eval()
+        val_loss = 0.0
+
+        with torch.no_grad():
+            for inputs, targets in val_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, targets)
+                val_loss += loss.item() * inputs.size(0)
+
+        val_loss = val_loss / len(val_loader.dataset)
+
+        # Early stopping check
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            counter = 0
+            # Save the best model parameters
+            best_model_params = model.state_dict().copy()
+        else:
+            counter += 1
+            if counter >= patience:
+                print(f"Early stopping triggered after {epoch + 1} epochs")
+                break
+
+    # Load the best model for evaluation
+    model.load_state_dict(best_model_params)
+
+    # Report the best validation loss
+    trial.report(best_val_loss, epoch)
+
+    # Handle pruning based on the intermediate value
+    if trial.should_prune():
+        raise optuna.exceptions.TrialPruned()
+
+    return best_val_loss
+
+
+# ------------------ PART 7: Main Function with Optuna ------------------
 
 def main():
     """
-    Main function to run the entire pipeline.
+    Main function to run the entire pipeline with Optuna hyperparameter optimization.
     """
-    # Hyperparameters
-    input_size = 3  # Number of features ('heart_rate_data', 'respiration_data', 'stress_data')
-    hidden_size = 9  # Number of features in each hidden state
-    num_layers = 1  # Number of recurrent layers
-    dropout = 0.3  # Dropout probability
-    learning_rate = 0.0005  # Learning rate
-    num_epochs = 100  # Maximum number of training epochs
-    batch_size = 2  # Batch size - smaller due to limited number of samples (small reminder Batch is the number of samples processed before the model is updated)
-    patience = 20  # Number of epochs with no improvement after which training will be stopped
-
-    print(hidden_size)
-    seed=42
-    random_seed=randint(0, 10000)
-
     # Set random seed for reproducibility
+    seed = 42
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-
-    # 1. Load your data
+    # Load data
     print("Loading data...")
-    # Leggi il file Excel
     ground_truth = pd.read_excel('df_CP_5_listlike.xlsx')
     X, y = load_and_prepare_data(ground_truth)
 
-    # 2. Preprocess data
+    # Preprocess data
     print("Preprocessing data...")
     X_train, X_test, y_train, y_test, scaler_X, scaler_y = preprocess_data(X, y, test_size=0.1, seed=seed)
 
-    print(f"Train shapes - X_train: {X_train.shape}, y_train: {y_train.shape}")
-    print(f"Test shapes - X_test: {X_test.shape}, y_test: {y_test.shape}")
-
-    # 3. Create datasets and dataloaders
-    # Split the training data further into training and validation sets
+    # Split training data into training and validation sets
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.1, random_state=seed)
 
+    print(f"Train shapes - X_train: {X_train.shape}, y_train: {y_train.shape}")
+    print(f"Validation shapes - X_val: {X_val.shape}, y_val: {y_val.shape}")
+    print(f"Test shapes - X_test: {X_test.shape}, y_test: {y_test.shape}")
+
+    # Create a study object and optimize the objective function
+    print("Starting hyperparameter optimization with Optuna...")
+    start_time = time.perf_counter()
+
+    # Create Optuna study
+    study = optuna.create_study(direction="minimize")
+
+    # Run the optimization
+    study.optimize(lambda trial: objective(trial, X_train, y_train, X_val, y_val, X_test, y_test, scaler_y),
+                   n_trials=50, timeout=3600)  # Run 50 trials or for 1 hour
+
+    end_time = time.perf_counter()
+    print(f"Optimization completed in {end_time - start_time:.2f} seconds")
+
+    # Get the best hyperparameters
+    best_params = study.best_params
+    print("Best hyperparameters:", best_params)
+
+    # Train the model with the best hyperparameters
+    print("Training model with the best hyperparameters...")
+
+    # Extract best hyperparameters
+    input_size = 3  # Fixed based on data
+    hidden_size = best_params['hidden_size']
+    num_layers = best_params['num_layers']
+    dropout = best_params['dropout']
+    batch_size = best_params['batch_size']
+    learning_rate = best_params['learning_rate']
+    optimizer_name = best_params['optimizer']
+    loss_function = best_params['loss_function']
+
+    # Create datasets and dataloaders for final model
     train_dataset = MultivariateTimeSeriesDataset(X_train, y_train)
     val_dataset = MultivariateTimeSeriesDataset(X_val, y_val)
     test_dataset = MultivariateTimeSeriesDataset(X_test, y_test)
@@ -462,46 +604,68 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
-    # 4. Initialize the model
-    print("Initializing model...")
-    model = LSTMRegressor(input_size, hidden_size, num_layers, dropout)
+    # Initialize the model with the best hyperparameters
+    best_model = LSTMRegressor(input_size, hidden_size, num_layers, dropout)
 
-    # 5. Define loss function and optimizer
-    #criterion = nn.MSELoss()
-    # Use Mean Absolute Error Loss for regression
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    # Set criterion based on the best loss function
+    if loss_function == "MSE":
+        criterion = nn.MSELoss()
+    elif loss_function == "MAE":
+        criterion = nn.L1Loss()
+    else:  # Huber
+        criterion = nn.SmoothL1Loss()
 
+    # Set optimizer
+    if optimizer_name == "Adam":
+        optimizer = optim.Adam(best_model.parameters(), lr=learning_rate)
+    elif optimizer_name == "RMSprop":
+        optimizer = optim.RMSprop(best_model.parameters(), lr=learning_rate)
+    else:  # SGD
+        optimizer = optim.SGD(best_model.parameters(), lr=learning_rate)
 
-
-
-
-    # 6. Train the model
-    print("Training model...")
+    # Train the model
     start = time.perf_counter()
     trained_model, history = train_model(
-        model=model,
+        model=best_model,
         train_loader=train_loader,
         val_loader=val_loader,
         criterion=criterion,
         optimizer=optimizer,
-        num_epochs=num_epochs,
-        patience=patience
+        num_epochs=100,
+        patience=20
     )
     end = time.perf_counter()
     print(f"Training time: {end - start:.2f} seconds")
 
-    # 7. Evaluate the model
+    # Evaluate the model
     print("Evaluating model...")
     evaluation_results = evaluate_model(trained_model, test_loader, scaler_y)
 
-    # 8. Visualize results
+    # Visualize results
     print("Visualizing results...")
     plot_results(history, evaluation_results)
 
+    # Plot optimization history
+    plt.figure(figsize=(10, 6))
+    optuna.visualization.matplotlib.plot_optimization_history(study)
+    plt.tight_layout()
+    plt.savefig('optuna_optimization_history.png')
+
+    # Plot parameter importances
+    plt.figure(figsize=(10, 6))
+    optuna.visualization.matplotlib.plot_param_importances(study)
+    plt.tight_layout()
+    plt.savefig('optuna_param_importances.png')
+
+    # Plot parallel coordinate plot
+    plt.figure(figsize=(10, 6))
+    optuna.visualization.matplotlib.plot_parallel_coordinate(study)
+    plt.tight_layout()
+    plt.savefig('optuna_parallel_coordinate.png')
+
     # Return trained model and results
-    return trained_model, evaluation_results
+    return trained_model, evaluation_results, study
 
 
-#if __name__ == "__main__":
-main()
+if __name__ == "__main__":
+    main()
