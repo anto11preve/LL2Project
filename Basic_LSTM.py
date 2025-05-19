@@ -545,7 +545,7 @@ def main():
     Main function to run the entire pipeline with Optuna hyperparameter optimization.
     """
     # Set random seed for reproducibility
-    seed = 42
+    seed = 20
     torch.manual_seed(seed)
     np.random.seed(seed)
 
