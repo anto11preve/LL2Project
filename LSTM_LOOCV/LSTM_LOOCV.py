@@ -449,11 +449,8 @@ def plot_loocv_results(evaluation_results, study=None):
     actuals = evaluation_results["actuals"]
     benchmark_predictions = evaluation_results["predictions"] * 0  # Always 0
 
-    # Create figure
-    if study is not None:
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 12))
-    else:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    # Create main figure for LOOCV results
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
     # Plot 1: Predictions vs Actual
     ax1.scatter(actuals, predictions, alpha=0.7, s=60, label="Model predictions", color='blue')
@@ -479,76 +476,50 @@ def plot_loocv_results(evaluation_results, study=None):
     ax2.set_title("Residual Plot")
     ax2.grid(True, alpha=0.3)
 
-    if study is not None:
-        # Plot 3: Optimization history (manual implementation)
-        trials = study.trials
-        trial_numbers = [t.number for t in trials if t.state == optuna.trial.TrialState.COMPLETE]
-        values = [t.value for t in trials if t.state == optuna.trial.TrialState.COMPLETE]
-
-        ax3.plot(trial_numbers, values, 'o-', alpha=0.7, markersize=4)
-        ax3.set_xlabel("Trial Number")
-        ax3.set_ylabel("Objective Value")
-        ax3.set_title("Optimization History")
-        ax3.grid(True, alpha=0.3)
-
-        # Add best value line
-        if values:
-            best_value = min(values)
-            ax3.axhline(y=best_value, color='red', linestyle='--', alpha=0.8,
-                        label=f'Best value: {best_value:.4f}')
-            ax3.legend()
-
-        # Plot 4: Parameter importances (manual implementation)
-        if len(trials) > 1:
-            # Get parameter names from completed trials
-            param_names = set()
-            for trial in trials:
-                if trial.state == optuna.trial.TrialState.COMPLETE:
-                    param_names.update(trial.params.keys())
-
-            param_names = list(param_names)
-
-            if param_names:
-                # Calculate simple correlation-based importance
-                importances = {}
-                for param_name in param_names:
-                    param_values = []
-                    objective_values = []
-
-                    for trial in trials:
-                        if (trial.state == optuna.trial.TrialState.COMPLETE and
-                                param_name in trial.params):
-                            param_values.append(trial.params[param_name])
-                            objective_values.append(trial.value)
-
-                    if len(param_values) > 1:
-                        # Calculate correlation coefficient
-                        correlation = np.corrcoef(param_values, objective_values)[0, 1]
-                        importances[param_name] = abs(correlation) if not np.isnan(correlation) else 0
-                    else:
-                        importances[param_name] = 0
-
-                # Sort by importance
-                sorted_params = sorted(importances.items(), key=lambda x: x[1], reverse=True)
-                param_names_sorted = [x[0] for x in sorted_params]
-                importance_values = [x[1] for x in sorted_params]
-
-                # Create horizontal bar plot
-                y_pos = np.arange(len(param_names_sorted))
-                ax4.barh(y_pos, importance_values, alpha=0.7)
-                ax4.set_yticks(y_pos)
-                ax4.set_yticklabels(param_names_sorted)
-                ax4.set_xlabel("Importance (|Correlation|)")
-                ax4.set_title("Parameter Importances")
-                ax4.grid(True, alpha=0.3, axis='x')
-        else:
-            ax4.text(0.5, 0.5, 'Not enough trials\nfor importance analysis',
-                     transform=ax4.transAxes, ha='center', va='center')
-            ax4.set_title("Parameter Importances")
-
     plt.tight_layout()
     plt.savefig('loocv_results.png', dpi=300, bbox_inches='tight')
     plt.show()
+
+    # Create separate Optuna plots if study is provided
+    if study is not None:
+        print("Creating Optuna visualization plots...")
+
+        # Plot optimization history
+        try:
+            fig_history = optuna.visualization.matplotlib.plot_optimization_history(study)
+            plt.title("Optimization History")
+            plt.savefig('optimization_history.png', dpi=300, bbox_inches='tight')
+            plt.show()
+        except Exception as e:
+            print(f"Could not create optimization history plot: {e}")
+
+        # Plot parameter importances
+        try:
+            fig_importance = optuna.visualization.matplotlib.plot_param_importances(study)
+            plt.title("Parameter Importances")
+            plt.savefig('parameter_importances.png', dpi=300, bbox_inches='tight')
+            plt.show()
+        except Exception as e:
+            print(f"Could not create parameter importance plot: {e}")
+
+        # Plot parameter relationships (optional)
+        try:
+            fig_parallel = optuna.visualization.matplotlib.plot_parallel_coordinate(study)
+            plt.title("Parameter Relationships")
+            plt.savefig('parameter_relationships.png', dpi=300, bbox_inches='tight')
+            plt.show()
+        except Exception as e:
+            print(f"Could not create parallel coordinate plot: {e}")
+
+        # Print best trial information
+        print(f"\nBest trial:")
+        print(f"  Value: {study.best_value:.4f}")
+        print(f"  Params: {study.best_params}")
+        print(f"  Number of trials: {len(study.trials)}")
+        print(
+            f"  Number of completed trials: {len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE])}")
+        print(
+            f"  Number of pruned trials: {len([t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED])}")
 
 def main():
     """
