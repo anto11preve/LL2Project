@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="LSTM, with CUDA tester and WITH Optuna, Huber as loss function">
-      <change afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV.py" afterDir="false" />
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Add LSTM model with Leave-One-Out Cross-Validation and Optuna hyperparameter optimization">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Basic_LSTM.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/best_lstm_model.pth" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/df_CP_5_listlike.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lstm_results.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/optuna_optimization_history.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/optuna_parallel_coordinate.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/optuna_param_importances.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +144,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747697366136</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Add LSTM model with Leave-One-Out Cross-Validation and Optuna hyperparameter optimization">
+      <option name="closed" value="true" />
+      <created>1748340156507</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1748340156507</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -160,6 +160,7 @@
     <MESSAGE value="LSTM, with CUDA tester and NO Optuna" />
     <MESSAGE value="LSTM, with CUDA tester and WITH Optuna" />
     <MESSAGE value="LSTM, with CUDA tester and WITH Optuna, Huber as loss function" />
-    <option name="LAST_COMMIT_MESSAGE" value="LSTM, with CUDA tester and WITH Optuna, Huber as loss function" />
+    <MESSAGE value="Add LSTM model with Leave-One-Out Cross-Validation and Optuna hyperparameter optimization" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add LSTM model with Leave-One-Out Cross-Validation and Optuna hyperparameter optimization" />
   </component>
 </project>
