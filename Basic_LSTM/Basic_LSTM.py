@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.backends.cudnn import benchmark
+#from torch.backends.cudnn import benchmark
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import time
-from random import randint
+#from random import randint
 import optuna
-from optuna.trial import TrialState
+#from optuna.trial import TrialState
 
 
 
@@ -69,6 +69,7 @@ class MultivariateTimeSeriesDataset(Dataset):
         # Convert numpy arrays to PyTorch tensors with float32 dtype
         self.X = torch.tensor(X, dtype=torch.float32)
         self.y = torch.tensor(y, dtype=torch.float32)
+
 
     def __len__(self):
         return len(self.X)
@@ -596,6 +597,26 @@ def main():
     optimizer_name = best_params['optimizer']
     #loss_function = best_params['loss_function']
     loss_function = "Huber" #fixed to Huber for now
+
+    #set a new enty in the best_params dictionary to save the loss function
+    best_params['loss_function'] = loss_function
+
+    # Print the best hyperparameters
+    print("Best hyperparameters:", best_params)
+
+    #save on disk the best hyperparameters, and load them again to check if they are the same
+    with open('best_hyperparameters.txt', 'w') as f:
+        f.write(str(best_params))
+    with open('best_hyperparameters.txt', 'r') as f:
+        best_params = f.read()
+
+    # Convert the string back to a dictionary
+    best_params = ast.literal_eval(best_params)
+    print("Best hyperparameters loaded from disk:", best_params)
+
+
+
+
 
     # Create datasets and dataloaders for final model
     train_dataset = MultivariateTimeSeriesDataset(X_train, y_train)
