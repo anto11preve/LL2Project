@@ -380,6 +380,9 @@ def train_final_model_loocv(X, y, best_hyperparams):
 
     print(f"\nImprovement over benchmark:")
     print(
+        f"  MSE improvement: {((benchmark_results['benchmark_mse'] - model_mse) / benchmark_results['benchmark_mse'] * 100):.1f}%"
+    )
+    print(
         f"  RMSE improvement: {((benchmark_results['benchmark_rmse'] - model_rmse) / benchmark_results['benchmark_rmse'] * 100):.1f}%")
     print(
         f"  MAE improvement: {((benchmark_results['benchmark_mae'] - model_mae) / benchmark_results['benchmark_mae'] * 100):.1f}%")
@@ -536,7 +539,7 @@ def main():
     seed = 20
     torch.manual_seed(seed)
     np.random.seed(seed)
-    train_timeout = 600  # Timeout for training in seconds
+    train_timeout = 7200  # Timeout for training in seconds
 
     # Load data
     print("Loading data...")
@@ -555,12 +558,13 @@ def main():
     # Run optimization with LOOCV
     study.optimize(
         lambda trial: objective_loocv(trial, X, y),
-        n_trials=100,  # Reduced because LOOCV is more expensive
+        n_trials=500,  # Reduced because LOOCV is more expensive
         timeout=train_timeout
     )
 
     end_time = time.perf_counter()
-    print(f"Optimization completed in {end_time - start_time:.2f} seconds")
+
+    print(f"Optimization completed in {(end_time - start_time)/60:.2f} minutes")
 
     # Get best hyperparameters
     best_params = study.best_params
