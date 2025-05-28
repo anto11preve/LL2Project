@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Refactor plot_loocv_results function to enhance visualization and add parameter importance analysis">
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Refactor plot_loocv_results function to streamline visualization and integrate Optuna plots for optimization history and parameter importance">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV.py" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,7 +161,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748355692532</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Refactor plot_loocv_results function to streamline visualization and integrate Optuna plots for optimization history and parameter importance">
+      <option name="closed" value="true" />
+      <created>1748357317295</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1748357317295</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -170,6 +179,7 @@
     <MESSAGE value="LSTM, with CUDA tester and WITH Optuna, Huber as loss function" />
     <MESSAGE value="Add LSTM model with Leave-One-Out Cross-Validation and Optuna hyperparameter optimization" />
     <MESSAGE value="Refactor plot_loocv_results function to enhance visualization and add parameter importance analysis" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor plot_loocv_results function to enhance visualization and add parameter importance analysis" />
+    <MESSAGE value="Refactor plot_loocv_results function to streamline visualization and integrate Optuna plots for optimization history and parameter importance" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor plot_loocv_results function to streamline visualization and integrate Optuna plots for optimization history and parameter importance" />
   </component>
 </project>

@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.backends.cudnn import benchmark
+#from torch.backends.cudnn import benchmark
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, LeaveOneOut
 import time
-from random import randint
+#from random import randint
 import optuna
-from optuna.trial import TrialState
+#from optuna.trial import TrialState
 import pickle #serialization of objects for disk saving
 
 
@@ -529,6 +529,7 @@ def main():
     seed = 20
     torch.manual_seed(seed)
     np.random.seed(seed)
+    train_timeout = 200  # Timeout for training in seconds
 
     # Load data
     print("Loading data...")
@@ -542,13 +543,13 @@ def main():
     print("Starting hyperparameter optimization with Optuna + LOOCV...")
     start_time = time.perf_counter()
 
-    study = optuna.create_study(direction="minimize")
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=seed))
 
     # Run optimization with LOOCV
     study.optimize(
         lambda trial: objective_loocv(trial, X, y),
         n_trials=100,  # Reduced because LOOCV is more expensive
-        timeout=7200  # 2 hours
+        timeout=train_timeout
     )
 
     end_time = time.perf_counter()
@@ -567,6 +568,8 @@ def main():
 
     # Train final model and evaluate with LOOCV
     evaluation_results = train_final_model_loocv(X, y, best_params)
+
+
 
     # Plot results
     print("Creating visualizations...")
