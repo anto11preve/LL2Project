@@ -327,7 +327,14 @@ def objective_loocv(trial, X, y):
     if trial.should_prune():
         raise optuna.exceptions.TrialPruned()
 
-    return mean_val_loss
+    model_mse = np.mean((predictions - actuals) ** 2)
+    model_rmse = np.sqrt(model_mse)
+    model_mae = np.mean(np.abs(predictions - actuals))
+
+
+
+    #return mean_val_loss
+    return model_mae
 
 
 def train_final_model_loocv(X, y, best_hyperparams):
