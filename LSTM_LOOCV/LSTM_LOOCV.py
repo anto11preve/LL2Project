@@ -529,7 +529,7 @@ def main():
     seed = 20
     torch.manual_seed(seed)
     np.random.seed(seed)
-    train_timeout = 200  # Timeout for training in seconds
+    train_timeout = 600  # Timeout for training in seconds
 
     # Load data
     print("Loading data...")
