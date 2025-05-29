@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.datasets import load_svmlight_file
+from sympy.physics.units import minutes
 #from torch.backends.cudnn import benchmark
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
@@ -567,7 +568,13 @@ def main():
 
     end_time = time.perf_counter()
 
-    print(f"Optimization completed in {(end_time - start_time)/60:.2f} minutes")
+    delta_time = end_time - start_time
+    delta_minutes= delta_time%360
+    delta_hours = delta_time//360
+
+    print(f"Total time for optimization: {delta_hours:.0f} hours and {delta_minutes:.0f} minutes")
+
+    #print(f"Optimization completed in {(end_time - start_time)/360:.2f} hours")
 
     # Get best hyperparameters
     best_params = study.best_params
@@ -579,6 +586,8 @@ def main():
 
     with open('best_params.pkl', 'rb') as f:
         best_params = pickle.load(f)
+
+    print("Best hyperparameters loaded from file:", best_params)
 
     # Train final model and evaluate with LOOCV
     evaluation_results = train_final_model_loocv(X, y, best_params)

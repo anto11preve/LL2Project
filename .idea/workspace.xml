@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,7 +200,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748450231880</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage">
+      <option name="closed" value="true" />
+      <created>1748494687579</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1748494687579</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
