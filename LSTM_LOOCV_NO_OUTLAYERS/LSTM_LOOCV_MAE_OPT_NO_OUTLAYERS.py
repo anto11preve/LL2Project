@@ -20,6 +20,7 @@ import pickle #serialization of objects for disk saving
 
 
 
+
 def load_and_prepare_data(df_CP_5):
     df = df_CP_5.copy()
 
@@ -32,6 +33,9 @@ def load_and_prepare_data(df_CP_5):
 
     for col in features:
         df[col] = df[col].apply(parse_series)
+
+    #teniamo solo le righe con la colonna 'Target_Unbiased' in valore assoluto minore di 0.5
+    df = df[np.abs(df['Target_Unbiased']) < 0.5]
 
     # Ora creiamo un array numpy shape (num_samples, 160, 3)
     X = np.stack(df[features].apply(lambda row: np.stack(row, axis=-1), axis=1).values)
@@ -554,7 +558,7 @@ def main():
     seed = 20
     torch.manual_seed(seed)
     np.random.seed(seed)
-    train_timeout = 7200  # Timeout for training in seconds
+    train_timeout = 600  # Timeout for training in seconds
 
     # Load data
     print("Loading data...")
