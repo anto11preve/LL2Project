@@ -168,8 +168,9 @@ def loocv_evaluation(X, y, hyperparams, verbose=False):
     batch_size = hyperparams['batch_size']
     learning_rate = hyperparams['learning_rate']
     optimizer_name = hyperparams['optimizer']
-    loss_function = hyperparams['loss_function']
+    #loss_function = hyperparams['loss_function']
     #loss_function = hyperparams.get('loss_function', 'Huber')
+    loss_function = hyperparams.get('loss_function', 'MAE')
 
     for fold_idx, (train_idx, val_idx) in enumerate(loo.split(X)):
         if verbose and fold_idx % 5 == 0:
@@ -293,8 +294,8 @@ def calculate_loocv_benchmark(y):
         "benchmark_mse": mse,
         "benchmark_rmse": rmse,
         "benchmark_mae": mae,
-        "predictions": predictions,
-        "actuals": actuals
+        "benchmark_predictions": predictions,
+        "benchmark_actuals": actuals
     }
 
 
@@ -318,8 +319,9 @@ def objective_loocv(trial, X, y):
         'batch_size': trial.suggest_categorical("batch_size", [2, 4, 8]),
         'learning_rate': trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True),
         'optimizer': trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"]),
-        'loss_function': trial.suggest_categorical("loss_function", ["MSE", "MAE", "Huber"])
-        #'loss_function': "Huber"  # Fixed based on your original code
+        #'loss_function': trial.suggest_categorical("loss_function", ["MSE", "MAE", "Huber"])
+        #'loss_function': "Huber"  # Fixed loss
+        'loss_function': "MAE"  # Fixed loss
     }
 
     # Perform LOOCV
@@ -409,7 +411,7 @@ def plot_loocv_results_old(evaluation_results, study=None):
     """
     predictions = evaluation_results["predictions"]
     actuals = evaluation_results["actuals"]
-    benchmark_predictions = evaluation_results["predictions"] * 0  # Always 0
+    benchmark_predictions = evaluation_results["benchmark_predictions"]  # Always 0
 
     # Create figure
     if study is not None:
@@ -477,7 +479,7 @@ def plot_loocv_results(evaluation_results, study=None):
     ax1.set_xlabel("Actual Values")
     ax1.set_ylabel("Predicted Values")
     ax1.set_title(
-        f"LOOCV Results\nModel RMSE: {evaluation_results['model_rmse']:.3f} | Benchmark RMSE: {evaluation_results['benchmark_rmse']:.3f}")
+        f"LOOCV Results\nModel MAE: {evaluation_results['model_mae']:.3f} | Benchmark MAE: {evaluation_results['benchmark_mae']:.3f}")
     ax1.legend()
     ax1.grid(True, alpha=0.3)
 
@@ -510,7 +512,7 @@ def plot_loocv_results(evaluation_results, study=None):
         # Plot parameter importances
         try:
             fig_importance = optuna.visualization.matplotlib.plot_param_importances(study)
-            plt.title("Parameter Importances")
+            #plt.title("Parameter Importances")     #image title is set in the plot function
             plt.savefig('parameter_importances.png', dpi=300, bbox_inches='tight')
             plt.show()
         except Exception as e:
@@ -519,7 +521,7 @@ def plot_loocv_results(evaluation_results, study=None):
         # Plot parameter relationships (optional)
         try:
             fig_parallel = optuna.visualization.matplotlib.plot_parallel_coordinate(study)
-            plt.title("Parameter Relationships")
+            #plt.title("Parameter Relationships")   #image title is set in the plot function
             plt.savefig('parameter_relationships.png', dpi=300, bbox_inches='tight')
             plt.show()
         except Exception as e:
@@ -559,20 +561,23 @@ def main():
 
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=seed))
 
+    #improvements at iteration 0,1 and 21
     # Run optimization with LOOCV
     study.optimize(
         lambda trial: objective_loocv(trial, X, y),
-        n_trials=500,  # Reduced because LOOCV is more expensive
+        n_trials=22,
         timeout=train_timeout
     )
 
     end_time = time.perf_counter()
 
     delta_time = end_time - start_time
-    delta_minutes= delta_time%360
-    delta_hours = delta_time//360
+    delta_seconds = delta_time % 60
+    delta_time = delta_time // 60
+    delta_minutes= delta_time%60
+    delta_hours = delta_time//60
 
-    print(f"Total time for optimization: {delta_hours:.0f} hours and {delta_minutes:.0f} minutes")
+    print(f"Total time for optimization: {delta_hours:.0f} hours, {delta_minutes:.0f} minutes and {delta_seconds:.0f} seconds")
 
     #print(f"Optimization completed in {(end_time - start_time)/360:.2f} hours")
 
