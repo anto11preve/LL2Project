@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from sklearn.datasets import load_svmlight_file
 #from torch.backends.cudnn import benchmark
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
@@ -166,7 +167,8 @@ def loocv_evaluation(X, y, hyperparams, verbose=False):
     batch_size = hyperparams['batch_size']
     learning_rate = hyperparams['learning_rate']
     optimizer_name = hyperparams['optimizer']
-    loss_function = hyperparams.get('loss_function', 'Huber')
+    loss_function = hyperparams['loss_function']
+    #loss_function = hyperparams.get('loss_function', 'Huber')
 
     for fold_idx, (train_idx, val_idx) in enumerate(loo.split(X)):
         if verbose and fold_idx % 5 == 0:
@@ -315,7 +317,8 @@ def objective_loocv(trial, X, y):
         'batch_size': trial.suggest_categorical("batch_size", [2, 4, 8]),
         'learning_rate': trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True),
         'optimizer': trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"]),
-        'loss_function': "Huber"  # Fixed based on your original code
+        'loss_function': trial.suggest_categorical("loss_function", ["MSE", "MAE", "Huber"])
+        #'loss_function': "Huber"  # Fixed based on your original code
     }
 
     # Perform LOOCV

@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Refactor training timeout and optimize study creation in LSTM model with Optuna">
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV.py" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748448849889</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage">
+      <option name="closed" value="true" />
+      <created>1748450231880</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1748450231880</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -205,6 +213,7 @@
     <MESSAGE value="Refactor plot_loocv_results function to enhance visualization and add parameter importance analysis" />
     <MESSAGE value="Refactor plot_loocv_results function to streamline visualization and integrate Optuna plots for optimization history and parameter importance" />
     <MESSAGE value="Refactor training timeout and optimize study creation in LSTM model with Optuna" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor training timeout and optimize study creation in LSTM model with Optuna" />
+    <MESSAGE value="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage" />
+    <option name="LAST_COMMIT_MESSAGE" value="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage" />
   </component>
 </project>
