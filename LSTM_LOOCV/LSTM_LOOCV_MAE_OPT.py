@@ -153,6 +153,14 @@ def loocv_evaluation(X, y, hyperparams, verbose=False):
     Returns:
         tuple: (mean_val_loss, std_val_loss, predictions, actuals)
     """
+
+    torch.manual_seed(20)
+    np.random.seed(20)
+    '''
+    if the seed is not set, the metrics results will be different from "training" to the test even though it has the same hyperparameters.
+    this is because the model weights are initialized randomly and the training process is stochastic, if the seed is not set, the state
+    of the random number generator will be different each time, leading to different starting weights.
+    '''
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     loo = LeaveOneOut()
@@ -565,7 +573,7 @@ def main():
     # Run optimization with LOOCV
     study.optimize(
         lambda trial: objective_loocv(trial, X, y),
-        n_trials=22,
+        n_trials=500000,
         timeout=train_timeout
     )
 
