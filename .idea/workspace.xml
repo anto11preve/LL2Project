@@ -4,14 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Set random seed set at every evaluation for consistency in metrics with the same hyperparameters; increase optimization trials to 500000">
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/best_params.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/best_params.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/loocv_results.png" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/loocv_results.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/optimization_history.png" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/optimization_history.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/parameter_importances.png" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/parameter_importances.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/parameter_relationships.png" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/parameter_relationships.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +81,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1747560427330</updated>
-      <workItem from="1748527190348" duration="11977000" />
+      <workItem from="1748527190348" duration="13361000" />
     </task>
     <task id="LOCAL-00001" summary="Added a test for CUDA">
       <option name="closed" value="true" />
@@ -241,7 +235,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748533736945</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity">
+      <option name="closed" value="true" />
+      <created>1748544242913</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1748544242913</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -259,7 +261,8 @@
     <MESSAGE value="Rename LSTM_LOOCV.py to LSTM_LOOCV_MAE_OPT.py and update training timeout to 7200 seconds; enhance optimization output with MSE improvement percentage" />
     <MESSAGE value="Refactor LSTM_LOOCV_MAE_OPT.py to use MAE as the default loss function; update optimization output to include total time in hours, minutes, and seconds; adjust project SDK references in configuration files" />
     <MESSAGE value="Set random seed set at every evaluation for consistency in metrics with the same hyperparameters; increase optimization trials to 500000" />
-    <option name="LAST_COMMIT_MESSAGE" value="Set random seed set at every evaluation for consistency in metrics with the same hyperparameters; increase optimization trials to 500000" />
+    <MESSAGE value="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/LL2Project$LSTM_LOOCV_MAE_OPT_NO_OUTLAYERS.coverage" NAME="LSTM_LOOCV_MAE_OPT_NO_OUTLAYERS Coverage Results" MODIFIED="1748534411135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/LSTM_LOOCV_NO_OUTLAYERS" />
