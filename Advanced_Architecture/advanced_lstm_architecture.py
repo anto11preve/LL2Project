@@ -52,49 +52,64 @@ class MultivariateTimeSeriesDataset(Dataset):
 # MODEL COMPONENTS
 # =============================================================================
 
-class RNNBlock(nn.Module):
-    """RNN + BatchNorm + Pooling block"""
+class CNNBlock(nn.Module):
+    """CNN + BatchNorm + MaxPooling block for temporal feature extraction"""
 
-    def __init__(self, input_size, hidden_size, rnn_type='LSTM', pooling_type='max'):
-        super(RNNBlock, self).__init__()
+    def __init__(self, in_channels, out_channels, kernel_size=3, pooling_size=2, pooling_type='max'):
+        super(CNNBlock, self).__init__()
 
-        self.rnn_type = rnn_type
         self.pooling_type = pooling_type
 
-        if rnn_type == 'LSTM':
-            self.rnn = nn.LSTM(input_size, hidden_size, batch_first=True)
-        elif rnn_type == 'GRU':
-            self.rnn = nn.GRU(input_size, hidden_size, batch_first=True)
-        else:  # RNN
-            self.rnn = nn.RNN(input_size, hidden_size, batch_first=True)
+        # CNN layer with padding to preserve sequence length initially
+        padding = (kernel_size - 1) // 2
+        self.conv = nn.Conv1d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            padding=padding
+        )
 
-        self.batch_norm = nn.BatchNorm1d(hidden_size)
+        # Batch normalization
+        self.batch_norm = nn.BatchNorm1d(out_channels)
+
+        # Activation
+        self.activation = nn.ReLU()
+
+        # Pooling layer
+        if pooling_type == 'max':
+            self.pooling = nn.MaxPool1d(kernel_size=pooling_size, stride=pooling_size)
+        elif pooling_type == 'avg':
+            self.pooling = nn.AvgPool1d(kernel_size=pooling_size, stride=pooling_size)
+        else:  # adaptive
+            self.pooling = nn.AdaptiveMaxPool1d(output_size=None)  # Will be set dynamically
 
     def forward(self, x):
-        if self.rnn_type in ['LSTM']:
-            output, (hidden, cell) = self.rnn(x)
-        else:
-            output, hidden = self.rnn(x)
+        # Input shape: (batch_size, seq_length, features)
+        # Conv1d expects: (batch_size, features, seq_length)
+        x = x.transpose(1, 2)
 
-        # Apply batch normalization
-        batch_size, seq_len, hidden_size = output.shape
-        output = output.reshape(batch_size * seq_len, hidden_size)
-        output = self.batch_norm(output)
-        output = output.reshape(batch_size, seq_len, hidden_size)
+        # Apply convolution, batch norm, activation
+        x = self.conv(x)
+        x = self.batch_norm(x)
+        x = self.activation(x)
 
         # Apply pooling
-        if self.pooling_type == 'max':
-            pooled_output, _ = torch.max(output, dim=1)
-        elif self.pooling_type == 'avg':
-            pooled_output = torch.mean(output, dim=1)
-        else:  # 'last'
-            pooled_output = output[:, -1, :]
+        if self.pooling_type == 'adaptive':
+            # Calculate output size to maintain reasonable sequence length
+            current_length = x.size(2)
+            target_length = max(current_length // 2, 1)
+            self.pooling = nn.AdaptiveMaxPool1d(output_size=target_length)
 
-        return output, pooled_output
+        x = self.pooling(x)
+
+        # Convert back to (batch_size, seq_length, features)
+        x = x.transpose(1, 2)
+
+        return x
 
 
 class LSTMBlock(nn.Module):
-    """LSTM + Dropout block"""
+    """LSTM + Dropout block for temporal sequence modeling"""
 
     def __init__(self, input_size, hidden_size, dropout_rate=0.2):
         super(LSTMBlock, self).__init__()
@@ -137,23 +152,24 @@ class AttentionLayer(nn.Module):
         return attended_output
 
 
-class ModularLSTMRegressor(nn.Module):
+class CNNLSTMRegressor(nn.Module):
     """
-    Modular architecture: n * (RNN+BatchNorm+Pooling) + m * (LSTM+Dropout) + FC
+    Advanced architecture: n * (CNN+BatchNorm+MaxPool) + m * (LSTM+Dropout) + FC
     Attention layers can be placed at different positions
     """
 
     def __init__(self, config: Dict[str, Any]):
-        super(ModularLSTMRegressor, self).__init__()
+        super(CNNLSTMRegressor, self).__init__()
 
         # Extract configuration
         self.input_size = config['input_size']
-        self.n_rnn_blocks = config['n_rnn_blocks']
+        self.n_cnn_blocks = config['n_cnn_blocks']
         self.m_lstm_blocks = config['m_lstm_blocks']
-        self.rnn_hidden_sizes = config['rnn_hidden_sizes']
-        self.lstm_hidden_sizes = config['lstm_hidden_sizes']
-        self.rnn_types = config['rnn_types']
+        self.cnn_channels = config['cnn_channels']
+        self.cnn_kernels = config['cnn_kernels']
+        self.pooling_sizes = config['pooling_sizes']
         self.pooling_types = config['pooling_types']
+        self.lstm_hidden_sizes = config['lstm_hidden_sizes']
         self.dropout_rates = config['dropout_rates']
         self.use_attention = config['use_attention']
         self.attention_positions = config['attention_positions']
@@ -161,51 +177,53 @@ class ModularLSTMRegressor(nn.Module):
         self.fc_hidden_size = config['fc_hidden_size']
         self.fc_dropout = config['fc_dropout']
 
-        # Build RNN blocks
-        self.rnn_blocks = nn.ModuleList()
-        current_input_size = self.input_size
+        # Build CNN blocks
+        self.cnn_blocks = nn.ModuleList()
+        current_channels = self.input_size
 
-        for i in range(self.n_rnn_blocks):
-            block = RNNBlock(
-                input_size=current_input_size,
-                hidden_size=self.rnn_hidden_sizes[i],
-                rnn_type=self.rnn_types[i],
+        for i in range(self.n_cnn_blocks):
+            block = CNNBlock(
+                in_channels=current_channels,
+                out_channels=self.cnn_channels[i],
+                kernel_size=self.cnn_kernels[i],
+                pooling_size=self.pooling_sizes[i],
                 pooling_type=self.pooling_types[i]
             )
-            self.rnn_blocks.append(block)
-            current_input_size = self.rnn_hidden_sizes[i]
+            self.cnn_blocks.append(block)
+            current_channels = self.cnn_channels[i]
 
-        # Attention after RNN blocks
-        self.attention_after_rnn = None
-        if self.use_attention and 'after_rnn' in self.attention_positions:
-            self.attention_after_rnn = AttentionLayer(
-                current_input_size,
+        # Attention after CNN blocks
+        self.attention_after_cnn = None
+        if self.use_attention and 'after_cnn' in self.attention_positions:
+            self.attention_after_cnn = AttentionLayer(
+                current_channels,
                 self.attention_heads
             )
 
         # Build LSTM blocks
         self.lstm_blocks = nn.ModuleList()
+        current_lstm_input = current_channels
 
         for i in range(self.m_lstm_blocks):
             block = LSTMBlock(
-                input_size=current_input_size,
+                input_size=current_lstm_input,
                 hidden_size=self.lstm_hidden_sizes[i],
                 dropout_rate=self.dropout_rates[i]
             )
             self.lstm_blocks.append(block)
-            current_input_size = self.lstm_hidden_sizes[i]
+            current_lstm_input = self.lstm_hidden_sizes[i]
 
         # Attention before FC
         self.attention_before_fc = None
         if self.use_attention and 'before_fc' in self.attention_positions:
             self.attention_before_fc = AttentionLayer(
-                current_input_size,
+                current_lstm_input,
                 self.attention_heads
             )
 
         # Fully connected layers
         self.fc_layers = nn.Sequential(
-            nn.Linear(current_input_size, self.fc_hidden_size),
+            nn.Linear(current_lstm_input, self.fc_hidden_size),
             nn.ReLU(),
             nn.Dropout(self.fc_dropout),
             nn.Linear(self.fc_hidden_size, self.fc_hidden_size // 2),
@@ -227,15 +245,14 @@ class ModularLSTMRegressor(nn.Module):
         if self.attention_at_start is not None:
             x = self.attention_at_start(x)
 
-        # Pass through RNN blocks
+        # Pass through CNN blocks
         current_output = x
-        for rnn_block in self.rnn_blocks:
-            full_output, pooled_output = rnn_block(current_output)
-            current_output = full_output
+        for cnn_block in self.cnn_blocks:
+            current_output = cnn_block(current_output)
 
-        # Attention after RNN blocks
-        if self.attention_after_rnn is not None:
-            current_output = self.attention_after_rnn(current_output)
+        # Attention after CNN blocks
+        if self.attention_after_cnn is not None:
+            current_output = self.attention_after_cnn(current_output)
 
         # Pass through LSTM blocks
         for lstm_block in self.lstm_blocks:
@@ -262,18 +279,20 @@ def create_model_config(trial) -> Dict[str, Any]:
     """Create model configuration from Optuna trial"""
 
     # Basic architecture parameters
-    n_rnn_blocks = trial.suggest_int("n_rnn_blocks", 1, 4)
+    n_cnn_blocks = trial.suggest_int("n_cnn_blocks", 1, 4)
     m_lstm_blocks = trial.suggest_int("m_lstm_blocks", 1, 3)
 
-    # RNN block configurations
-    rnn_hidden_sizes = []
-    rnn_types = []
+    # CNN block configurations
+    cnn_channels = []
+    cnn_kernels = []
+    pooling_sizes = []
     pooling_types = []
 
-    for i in range(n_rnn_blocks):
-        rnn_hidden_sizes.append(trial.suggest_int(f"rnn_hidden_size_{i}", 16, 128, step=16))
-        rnn_types.append(trial.suggest_categorical(f"rnn_type_{i}", ["LSTM", "GRU", "RNN"]))
-        pooling_types.append(trial.suggest_categorical(f"pooling_type_{i}", ["max", "avg", "last"]))
+    for i in range(n_cnn_blocks):
+        cnn_channels.append(trial.suggest_int(f"cnn_channels_{i}", 8, 128, step=8))
+        cnn_kernels.append(trial.suggest_int(f"cnn_kernel_{i}", 3, 9, step=2))  # 3, 5, 7, 9
+        pooling_sizes.append(trial.suggest_int(f"pooling_size_{i}", 2, 4))
+        pooling_types.append(trial.suggest_categorical(f"pooling_type_{i}", ["max", "avg", "adaptive"]))
 
     # LSTM block configurations
     lstm_hidden_sizes = []
@@ -291,8 +310,8 @@ def create_model_config(trial) -> Dict[str, Any]:
     if use_attention:
         if trial.suggest_categorical("attention_at_start", [True, False]):
             attention_positions.append("at_start")
-        if trial.suggest_categorical("attention_after_rnn", [True, False]):
-            attention_positions.append("after_rnn")
+        if trial.suggest_categorical("attention_after_cnn", [True, False]):
+            attention_positions.append("after_cnn")
         if trial.suggest_categorical("attention_before_fc", [True, False]):
             attention_positions.append("before_fc")
 
@@ -308,12 +327,13 @@ def create_model_config(trial) -> Dict[str, Any]:
 
     return {
         'input_size': 3,
-        'n_rnn_blocks': n_rnn_blocks,
+        'n_cnn_blocks': n_cnn_blocks,
         'm_lstm_blocks': m_lstm_blocks,
-        'rnn_hidden_sizes': rnn_hidden_sizes,
-        'lstm_hidden_sizes': lstm_hidden_sizes,
-        'rnn_types': rnn_types,
+        'cnn_channels': cnn_channels,
+        'cnn_kernels': cnn_kernels,
+        'pooling_sizes': pooling_sizes,
         'pooling_types': pooling_types,
+        'lstm_hidden_sizes': lstm_hidden_sizes,
         'dropout_rates': dropout_rates,
         'use_attention': use_attention,
         'attention_positions': attention_positions,
@@ -450,7 +470,7 @@ def train_single_fold_advanced(model, train_loader, val_loader, config):
 
 
 def loocv_evaluation_advanced(X, y, model_config, training_config, verbose=False):
-    """Advanced LOOCV evaluation with modular architecture"""
+    """Advanced LOOCV evaluation with CNN-LSTM architecture"""
 
     torch.manual_seed(20)
     np.random.seed(20)
@@ -496,7 +516,7 @@ def loocv_evaluation_advanced(X, y, model_config, training_config, verbose=False
         val_loader = DataLoader(val_dataset, batch_size=1)
 
         # Create model
-        model = ModularLSTMRegressor(model_config)
+        model = CNNLSTMRegressor(model_config)
 
         # Train the fold
         val_loss, best_model_state = train_single_fold_advanced(
@@ -568,7 +588,7 @@ def calculate_loocv_benchmark(y):
 
 def train_final_model_advanced(X, y, best_params):
     """Train the final model using the best hyperparameters and evaluate with LOOCV"""
-    print("Training final model with LOOCV evaluation...")
+    print("Training final CNN-LSTM model with LOOCV evaluation...")
 
     # Reconstruct model and training configs from best_params
     model_config = {}
@@ -576,17 +596,19 @@ def train_final_model_advanced(X, y, best_params):
 
     # Extract model configuration
     model_config['input_size'] = 3
-    model_config['n_rnn_blocks'] = best_params['n_rnn_blocks']
+    model_config['n_cnn_blocks'] = best_params['n_cnn_blocks']
     model_config['m_lstm_blocks'] = best_params['m_lstm_blocks']
 
-    # Extract RNN block configurations
-    model_config['rnn_hidden_sizes'] = []
-    model_config['rnn_types'] = []
+    # Extract CNN block configurations
+    model_config['cnn_channels'] = []
+    model_config['cnn_kernels'] = []
+    model_config['pooling_sizes'] = []
     model_config['pooling_types'] = []
 
-    for i in range(model_config['n_rnn_blocks']):
-        model_config['rnn_hidden_sizes'].append(best_params[f'rnn_hidden_size_{i}'])
-        model_config['rnn_types'].append(best_params[f'rnn_type_{i}'])
+    for i in range(model_config['n_cnn_blocks']):
+        model_config['cnn_channels'].append(best_params[f'cnn_channels_{i}'])
+        model_config['cnn_kernels'].append(best_params[f'cnn_kernel_{i}'])
+        model_config['pooling_sizes'].append(best_params[f'pooling_size_{i}'])
         model_config['pooling_types'].append(best_params[f'pooling_type_{i}'])
 
     # Extract LSTM block configurations
@@ -604,8 +626,8 @@ def train_final_model_advanced(X, y, best_params):
     if model_config['use_attention']:
         if best_params.get('attention_at_start', False):
             model_config['attention_positions'].append('at_start')
-        if best_params.get('attention_after_rnn', False):
-            model_config['attention_positions'].append('after_rnn')
+        if best_params.get('attention_after_cnn', False):
+            model_config['attention_positions'].append('after_cnn')
         if best_params.get('attention_before_fc', False):
             model_config['attention_positions'].append('before_fc')
 
@@ -645,7 +667,7 @@ def train_final_model_advanced(X, y, best_params):
     benchmark_results = calculate_loocv_benchmark(y)
 
     print("\n" + "=" * 50)
-    print("FINAL RESULTS WITH ADVANCED LOOCV")
+    print("FINAL RESULTS WITH CNN-LSTM LOOCV")
     print("=" * 50)
     print(f"Model Performance (LOOCV):")
     print(f"  Mean CV Loss: {mean_val_loss:.4f} ± {std_val_loss:.4f}")
@@ -683,8 +705,8 @@ def train_final_model_advanced(X, y, best_params):
 # VISUALIZATION FUNCTIONS
 # =============================================================================
 
-def plot_advanced_results(evaluation_results, study=None):
-    """Plot advanced LOOCV results and optionally Optuna optimization history"""
+def plot_cnn_lstm_results(evaluation_results, study=None):
+    """Plot CNN-LSTM LOOCV results and optionally Optuna optimization history"""
     predictions = evaluation_results["predictions"]
     actuals = evaluation_results["actuals"]
     benchmark_predictions = evaluation_results["predictions"] * 0
@@ -693,7 +715,7 @@ def plot_advanced_results(evaluation_results, study=None):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
     # Plot 1: Predictions vs Actual
-    ax1.scatter(actuals, predictions, alpha=0.7, s=60, label="Model predictions", color='blue')
+    ax1.scatter(actuals, predictions, alpha=0.7, s=60, label="CNN-LSTM predictions", color='blue')
     ax1.scatter(actuals, benchmark_predictions, alpha=0.7, s=60, label="Benchmark (0)", color='red', marker='x')
 
     # Line of equality
@@ -703,7 +725,7 @@ def plot_advanced_results(evaluation_results, study=None):
     ax1.set_xlabel("Actual Values")
     ax1.set_ylabel("Predicted Values")
     ax1.set_title(
-        f"Advanced LOOCV Results\nModel MAE: {evaluation_results['model_mae']:.3f} | Benchmark MAE: {evaluation_results['benchmark_mae']:.3f}")
+        f"CNN-LSTM LOOCV Results\nModel MAE: {evaluation_results['model_mae']:.3f} | Benchmark MAE: {evaluation_results['benchmark_mae']:.3f}")
     ax1.legend()
     ax1.grid(True, alpha=0.3)
 
@@ -717,18 +739,18 @@ def plot_advanced_results(evaluation_results, study=None):
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('advanced_loocv_results.png', dpi=300, bbox_inches='tight')
+    plt.savefig('cnn_lstm_loocv_results.png', dpi=300, bbox_inches='tight')
     plt.show()
 
     # Create separate Optuna plots if study is provided
     if study is not None:
-        print("Creating advanced Optuna visualization plots...")
+        print("Creating CNN-LSTM Optuna visualization plots...")
 
         # Plot optimization history
         try:
             fig_history = optuna.visualization.matplotlib.plot_optimization_history(study)
-            plt.title("Advanced Optimization History")
-            plt.savefig('advanced_optimization_history.png', dpi=300, bbox_inches='tight')
+            plt.title("CNN-LSTM Optimization History")
+            plt.savefig('cnn_lstm_optimization_history.png', dpi=300, bbox_inches='tight')
             plt.show()
         except Exception as e:
             print(f"Could not create optimization history plot: {e}")
@@ -736,7 +758,7 @@ def plot_advanced_results(evaluation_results, study=None):
         # Plot parameter importances
         try:
             fig_importance = optuna.visualization.matplotlib.plot_param_importances(study)
-            plt.savefig('advanced_parameter_importances.png', dpi=300, bbox_inches='tight')
+            plt.savefig('cnn_lstm_parameter_importances.png', dpi=300, bbox_inches='tight')
             plt.show()
         except Exception as e:
             print(f"Could not create parameter importance plot: {e}")
@@ -744,26 +766,26 @@ def plot_advanced_results(evaluation_results, study=None):
         # Plot parameter relationships
         try:
             fig_parallel = optuna.visualization.matplotlib.plot_parallel_coordinate(study)
-            plt.savefig('advanced_parameter_relationships.png', dpi=300, bbox_inches='tight')
+            plt.savefig('cnn_lstm_parameter_relationships.png', dpi=300, bbox_inches='tight')
             plt.show()
         except Exception as e:
             print(f"Could not create parallel coordinate plot: {e}")
 
         # Plot slice plot for key parameters
         try:
-            key_params = ['learning_rate', 'n_rnn_blocks', 'm_lstm_blocks', 'fc_hidden_size']
+            key_params = ['learning_rate', 'n_cnn_blocks', 'm_lstm_blocks', 'fc_hidden_size']
             existing_params = [p for p in key_params if p in study.best_params]
 
             if existing_params:
                 fig_slice = optuna.visualization.matplotlib.plot_slice(study, params=existing_params)
-                plt.savefig('advanced_parameter_slices.png', dpi=300, bbox_inches='tight')
+                plt.savefig('cnn_lstm_parameter_slices.png', dpi=300, bbox_inches='tight')
                 plt.show()
         except Exception as e:
             print(f"Could not create slice plot: {e}")
 
         # Print comprehensive trial information
         print(f"\n" + "=" * 60)
-        print("OPTUNA OPTIMIZATION SUMMARY")
+        print("CNN-LSTM OPTUNA OPTIMIZATION SUMMARY")
         print("=" * 60)
         print(f"Best trial:")
         print(f"  Value (MAE): {study.best_value:.4f}")
@@ -777,14 +799,14 @@ def plot_advanced_results(evaluation_results, study=None):
         print(f"  Pruned trials: {len(pruned_trials)}")
         print(f"  Failed trials: {len(failed_trials)}")
 
-        print(f"\nBest Architecture:")
+        print(f"\nBest CNN-LSTM Architecture:")
 
         # Print model architecture details
         best_params = study.best_params
-        print(f"  RNN Blocks: {best_params['n_rnn_blocks']}")
-        for i in range(best_params['n_rnn_blocks']):
+        print(f"  CNN Blocks: {best_params['n_cnn_blocks']}")
+        for i in range(best_params['n_cnn_blocks']):
             print(
-                f"    Block {i + 1}: {best_params[f'rnn_type_{i}']} - {best_params[f'rnn_hidden_size_{i}']} units - {best_params[f'pooling_type_{i}']} pooling")
+                f"    Block {i + 1}: {best_params[f'cnn_channels_{i}']} channels - kernel {best_params[f'cnn_kernel_{i}']} - {best_params[f'pooling_type_{i}']} pool({best_params[f'pooling_size_{i}']})")
 
         print(f"  LSTM Blocks: {best_params['m_lstm_blocks']}")
         for i in range(best_params['m_lstm_blocks']):
@@ -797,8 +819,8 @@ def plot_advanced_results(evaluation_results, study=None):
             positions = []
             if best_params.get('attention_at_start', False):
                 positions.append('start')
-            if best_params.get('attention_after_rnn', False):
-                positions.append('after_rnn')
+            if best_params.get('attention_after_cnn', False):
+                positions.append('after_cnn')
             if best_params.get('attention_before_fc', False):
                 positions.append('before_fc')
             print(f"    Positions: {', '.join(positions)}")
@@ -824,11 +846,12 @@ def plot_advanced_results(evaluation_results, study=None):
 
 def create_robust_sampler(seed=20):
     """Create the best available sampler - TPE is optimal for mixed parameter types"""
-    print("Using TPE sampler (optimal for mixed parameter types)")
+    print("Using TPE sampler (optimal for mixed parameter types - no warnings)")
     return optuna.samplers.TPESampler(
         seed=seed,
         n_startup_trials=10,
-        n_ei_candidates=24
+        n_ei_candidates=24,
+        warn_independent_sampling=False  # This suppresses all warnings
     )
 
 
@@ -853,8 +876,8 @@ class EarlyStoppingCallback:
             study.stop()
 
 
-def objective_advanced(trial, X, y):
-    """Advanced objective function with modular architecture"""
+def objective_cnn_lstm(trial, X, y):
+    """Objective function for CNN-LSTM architecture optimization"""
 
     try:
         # Create configurations
@@ -893,8 +916,8 @@ def objective_advanced(trial, X, y):
 # MAIN FUNCTION
 # =============================================================================
 
-def main_advanced():
-    """Main function with advanced architecture"""
+def main_cnn_lstm():
+    """Main function with CNN-LSTM architecture"""
 
     # Set random seed for reproducibility
     seed = 20
@@ -909,13 +932,21 @@ def main_advanced():
 
     print(f"Data shapes - X: {X.shape}, y: {y.shape}")
     print(f"Using LOOCV: {len(y)} folds")
+    print(f"Target: Beat simple LSTM baseline of ~0.19 MAE")
+    print("Architecture: CNN blocks (feature extraction) + LSTM blocks (temporal modeling)")
 
-    # Create Optuna study with robust sampler selection
-    print("Starting hyperparameter optimization with advanced architecture...")
+    # Create Optuna study with TPE sampler (NO warnings!)
+    print("Starting hyperparameter optimization with CNN-LSTM architecture...")
     start_time = time.perf_counter()
 
-    # Create robust sampler
-    sampler = create_robust_sampler(seed)
+    # Force TPE sampler to avoid all warnings
+    sampler = optuna.samplers.TPESampler(
+        seed=seed,
+        n_startup_trials=10,
+        n_ei_candidates=24,
+        warn_independent_sampling=False
+    )
+    print("Using TPE sampler - no more warnings!")
 
     study = optuna.create_study(
         direction="minimize",
@@ -928,7 +959,7 @@ def main_advanced():
 
     # Run optimization
     study.optimize(
-        lambda trial: objective_advanced(trial, X, y),
+        lambda trial: objective_cnn_lstm(trial, X, y),
         n_trials=1000,
         timeout=train_timeout,
         callbacks=[early_stopping]
@@ -950,21 +981,21 @@ def main_advanced():
     print(f"Best LOOCV MAE: {study.best_value:.4f}")
 
     # Save results
-    with open('best_params_advanced.pkl', 'wb') as f:
+    with open('best_params_cnn_lstm.pkl', 'wb') as f:
         pickle.dump(best_params, f)
 
-    with open('study_advanced.pkl', 'wb') as f:
+    with open('study_cnn_lstm.pkl', 'wb') as f:
         pickle.dump(study, f)
 
     # Train final model and evaluate with LOOCV
     evaluation_results = train_final_model_advanced(X, y, best_params)
 
     # Plot results
-    print("Creating advanced visualizations...")
-    plot_advanced_results(evaluation_results, study)
+    print("Creating CNN-LSTM visualizations...")
+    plot_cnn_lstm_results(evaluation_results, study)
 
     return evaluation_results, study
 
 
 if __name__ == "__main__":
-    results, study = main_advanced()
+    results, study = main_cnn_lstm()
