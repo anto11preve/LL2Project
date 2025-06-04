@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity" />
+    <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Reduce training timeout in advanced_lstm_architecture.py from 7200 seconds to 200 seconds for quicker iterations">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -240,11 +242,38 @@
       <option name="project" value="LOCAL" />
       <updated>1748544242913</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Update workspace.xml to correct GitHub repository URL and clean up formatting">
+      <option name="closed" value="true" />
+      <created>1749026165206</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1749026165206</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Reduce training timeout in advanced_lstm_architecture.py from 7200 seconds to 200 seconds for quicker iterations">
+      <option name="closed" value="true" />
+      <created>1749026200731</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1749026200731</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added a test for CUDA" />
@@ -259,7 +288,9 @@
     <MESSAGE value="Refactor LSTM_LOOCV_MAE_OPT.py to use MAE as the default loss function; update optimization output to include total time in hours, minutes, and seconds; adjust project SDK references in configuration files" />
     <MESSAGE value="Set random seed set at every evaluation for consistency in metrics with the same hyperparameters; increase optimization trials to 500000" />
     <MESSAGE value="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor LSTM_LOOCV_MAE_OPT.py to remove unused imports and clean up workspace.xml; update last commit message for clarity" />
+    <MESSAGE value="Update workspace.xml to correct GitHub repository URL and clean up formatting" />
+    <MESSAGE value="Reduce training timeout in advanced_lstm_architecture.py from 7200 seconds to 200 seconds for quicker iterations" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reduce training timeout in advanced_lstm_architecture.py from 7200 seconds to 200 seconds for quicker iterations" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/LL2Project$LSTM_LOOCV_MAE_OPT_NO_OUTLAYERS.coverage" NAME="LSTM_LOOCV_MAE_OPT_NO_OUTLAYERS Coverage Results" MODIFIED="1748534411135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/LSTM_LOOCV_NO_OUTLAYERS" />
