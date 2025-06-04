@@ -864,7 +864,7 @@ def main_advanced():
     seed = 20
     torch.manual_seed(seed)
     np.random.seed(seed)
-    train_timeout = 7200  # 2 hours
+    train_timeout = 200  # 2 hours
     
     # Load data
     print("Loading data...")
