@@ -1,0 +1,1 @@
+{'hidden_size': 29, 'num_layers': 1, 'dropout': 0.14526290378999238, 'batch_size': 2, 'learning_rate': 1.0709718902496794e-05, 'optimizer': 'Adam', 'loss_function': 'Huber'}

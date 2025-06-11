@@ -7,6 +7,17 @@
     <list default="true" id="6851a710-b45c-4aa5-9dcf-1dd839d55018" name="Changes" comment="Refactor advanced_lstm_architecture.py to improve code readability and organization; add docstrings for data loading, model components, and training functions">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Advanced_Architecture/advanced_lstm_architecture.py" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/advanced_lstm_architecture.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Advanced_Architecture/best_params_cnn_lstm.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/best_params_cnn_lstm.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_loocv_results.png" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_loocv_results.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_optimization_history.png" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_optimization_history.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_parameter_importances.png" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_parameter_importances.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_parameter_slices.png" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/cnn_lstm_parameter_slices.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Advanced_Architecture/study_cnn_lstm.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Advanced_Architecture/study_cnn_lstm.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Basic_LSTM/best_lstm_model.pth" beforeDir="false" afterPath="$PROJECT_DIR$/Basic_LSTM/best_lstm_model.pth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Basic_LSTM/lstm_results.png" beforeDir="false" afterPath="$PROJECT_DIR$/Basic_LSTM/lstm_results.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Basic_LSTM/optuna_optimization_history.png" beforeDir="false" afterPath="$PROJECT_DIR$/Basic_LSTM/optuna_optimization_history.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Basic_LSTM/optuna_parallel_coordinate.png" beforeDir="false" afterPath="$PROJECT_DIR$/Basic_LSTM/optuna_parallel_coordinate.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Basic_LSTM/optuna_param_importances.png" beforeDir="false" afterPath="$PROJECT_DIR$/Basic_LSTM/optuna_param_importances.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/LSTM_LOOCV_MAE_OPT.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/optimization_history.png" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/optimization_history.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LSTM_LOOCV/parameter_importances.png" beforeDir="false" afterPath="$PROJECT_DIR$/LSTM_LOOCV/parameter_importances.png" afterDir="false" />
@@ -35,8 +46,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/anto11preve/LL2Project.git&quot;,
-    &quot;accountId&quot;: &quot;98fba39e-2106-4937-af13-173c882dfe59&quot;
+    &quot;url&quot;: &quot;https://github.com/anto11preve/LL2Project&quot;,
+    &quot;accountId&quot;: &quot;6dbd9381-0e34-4323-b59d-08e7ad40ac9c&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -50,31 +61,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.Basic_LSTM.executor": "Run",
-    "Python.LSTM_LOOCV_MAE_OPT.executor": "Run",
-    "Python.LSTM_LOOCV_MAE_OPT_NO_OUTLAYERS.executor": "Run",
-    "Python.Test.executor": "Run",
-    "Python.advanced_lstm_architecture.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/anto1/Documents/LL2Project",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.Basic_LSTM.executor&quot;: &quot;Run&quot;,
+    &quot;Python.LSTM_LOOCV_MAE_OPT.executor&quot;: &quot;Run&quot;,
+    &quot;Python.LSTM_LOOCV_MAE_OPT_NO_OUTLAYERS.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.advanced_lstm_architecture.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mmt_model.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/anto1/Documents/LL2Project&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-f78a9d071105-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.26574.90" />
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
       </set>
     </attachedChunks>
   </component>
@@ -87,6 +100,8 @@
       <option name="presentableId" value="Default" />
       <updated>1747560427330</updated>
       <workItem from="1748527190348" duration="13361000" />
+      <workItem from="1749480526505" duration="1710000" />
+      <workItem from="1749568320018" duration="7271000" />
     </task>
     <task id="LOCAL-00001" summary="Added a test for CUDA">
       <option name="closed" value="true" />
@@ -313,5 +328,6 @@
     <SUITE FILE_PATH="coverage/advanced_lstm_architecture_py$advanced_lstm_architecture.coverage" NAME="advanced_lstm_architecture Coverage Results" MODIFIED="1749040251103" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Advanced_Architecture" />
     <SUITE FILE_PATH="coverage/LL2Project$LSTM_LOOCV_MAE_OPT.coverage" NAME="LSTM_LOOCV_MAE_OPT Coverage Results" MODIFIED="1748532642132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/LSTM_LOOCV" />
     <SUITE FILE_PATH="coverage/advanced_lstm_architecture_py$LSTM_LOOCV_MAE_OPT.coverage" NAME="LSTM_LOOCV_MAE_OPT Coverage Results" MODIFIED="1749041930998" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/LSTM_LOOCV" />
+    <SUITE FILE_PATH="coverage/mmt_model_py$mmt_model.coverage" NAME="mmt_model Coverage Results" MODIFIED="1749480910711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Last_Architecture" />
   </component>
 </project>

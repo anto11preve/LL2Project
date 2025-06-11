@@ -574,7 +574,7 @@ def main():
     # Run optimization with LOOCV
     study.optimize(
         lambda trial: objective_loocv(trial, X, y),
-        n_trials=5,
+        n_trials=100,
         timeout=train_timeout
     )
 

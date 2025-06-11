@@ -12,6 +12,30 @@ import time
 import optuna
 import pickle
 from typing import Dict, Any, Tuple, List
+import os
+
+
+def set_all_seeds(seed=42):
+    """Imposta tutti i seed per garantire riproducibilità"""
+    # Python random
+
+
+
+    # NumPy
+    np.random.seed(seed)
+
+    # PyTorch
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    # Per DataLoader
+    # Variabili d'ambiente per operazioni deterministiche
+
+    os.environ['PYTHONHASHSEED'] = str(seed)
 
 
 # =============================================================================
@@ -472,8 +496,7 @@ def train_single_fold_advanced(model, train_loader, val_loader, config):
 def loocv_evaluation_advanced(X, y, model_config, training_config, verbose=False):
     """Advanced LOOCV evaluation with CNN-LSTM architecture"""
 
-    torch.manual_seed(20)
-    np.random.seed(20)
+    set_all_seeds(20)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     loo = LeaveOneOut()
@@ -879,6 +902,7 @@ class EarlyStoppingCallback:
 def objective_cnn_lstm(trial, X, y):
     """Objective function for CNN-LSTM architecture optimization"""
 
+
     try:
         # Create configurations
         model_config = create_model_config(trial)
@@ -918,12 +942,12 @@ def objective_cnn_lstm(trial, X, y):
 
 def main_cnn_lstm():
     """Main function with CNN-LSTM architecture"""
-
+    seed =20
     # Set random seed for reproducibility
-    seed = 20
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    train_timeout = 7200  # 2 hours
+    set_all_seeds(seed)
+
+    trials=10000;
+    train_timeout = 12*(60*60)  # 12 hours
 
     # Load data
     print("Loading data...")
@@ -960,7 +984,7 @@ def main_cnn_lstm():
     # Run optimization
     study.optimize(
         lambda trial: objective_cnn_lstm(trial, X, y),
-        n_trials=1000,
+        n_trials=trials,
         timeout=train_timeout,
         callbacks=[early_stopping]
     )
